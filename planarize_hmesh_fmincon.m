@@ -40,62 +40,24 @@ function planarize_hmesh_fmincon(file_name)
     fun = @(x) objfun(V0, x);
     con = @(x) mycon(dat, x);
     [Vproj,fval,exitflag,output,lambda,~,~] = fmincon(fun, V0, [],[],[],[],[],[],con,options);
+    [~,final_planarity] = con(Vproj);
+    figure; hist(final_planarity); hold all; title('final planarities');
     
-
-    for i=1:maxiters
-        %% get pre preprojection stats
-        Fv = reshape(Fmatselector*V,4,nF,3); % [4 nf 3]
-        Fv_pr = permute(Fv,[2 3 1]);
-        preprojection_planarity(:,i) = face_planarity(Fv_pr);
-
-        %% local projection and stats
-        FvProj_pr = planar_face_projections(Fv_pr, false);
-        FvProj = permute(FvProj_pr, [3 1 2]);
-        postprojection_planarity(:,i) = face_planarity(FvProj_pr);
-
-        %% aggregate by least squares system
-        V = Fmatselector\reshape(FvProj,[],3);
-        globalproj_error(i) = norm(Fmatselector*V - reshape(Fv,[],3));
-        Vs{i} = V;
-
-        %% visualize
-        try; delete(ptc); delete(ptc2); catch; end;
-        nexttile(1); hold all; axis equal off; rotate3d on; 
-        ptc = patch('faces', reshape(1:(nF*4),4,[])', 'vertices', reshape(FvProj,[],3), 'facecolor','green','facealpha',1,'edgealpha',1)
-        title(['Glob Proj Error: ' num2str(globalproj_error(i)) ])
-        nexttile(2); hold all; axis equal off; rotate3d on; 
-        ptc2 = patch('vertices',V,'faces',F,'facealpha',1,'facecolor','green','edgealpha',1)
-        title(['Planarity: ' num2str(norm(preprojection_planarity(:,i))) ])
-        drawnow;
-
-        if i > 30
-            last30 = vecnorm(preprojection_planarity(:,(i-30):i),2,1);
-            [p,S,mu] = polyfit(1:numel(last30), last30, 1);
-            if p(1) > -convergencethresh % energy decrease slope is too small
-                disp('Converged');
-                break;
-            end
-        end
-    end
-
-    %% plot results. seems to be logarithmic convergence.
-    figure; t=tiledlayout(3,1);t.TileSpacing = 'compact';t.Padding = 'compact';
-    nexttile; 
-    semilogx(vecnorm(preprojection_planarity(:,1:i),2,1))
-    hold all; title('pre projection');
-    nexttile; 
-    plot(vecnorm(postprojection_planarity(:,1:i),2,1))
-    hold all; title('post projection');
-    nexttile; 
-    cla; semilogx(globalproj_error(1:i))
-    hold all; title('global projection error');
-
+    
+    figure; t=tiledlayout(1,2);t.TileSpacing = 'compact';t.Padding = 'compact';
+    nexttile(1); hold all; axis equal off; rotate3d on; 
+    ptc1 = patch('vertices',V0,'faces',F,'facealpha',1,'facecolor','green','edgealpha',1)
+    title('Original')
+    nexttile(2); hold all; axis equal off; rotate3d on; 
+    ptc2 = patch('vertices',Vproj,'faces',F,'facealpha',1,'facecolor','green','edgealpha',1)
+    title(['After Projection Distance: ' num2str(fval) ' Planarity: ' num2str(norm(final_planarity)) ])
+    
     %% save output
-    [dname,fname,ext] = fileparts(file_name);
-    out_fname = ['results/' fname];
-    outmesh.cells = mesh.cells; outmesh.points = V;
-    save_vtk(outmesh, [out_fname '.vtk'])
-    save([out_fname '.mat'])
+%     [dname,fname,ext] = fileparts(file_name);
+%     out_fname = ['results/' fname];
+%     outmesh.cells = mesh.cells; outmesh.points = V;
+%     save_vtk(outmesh, [out_fname '.vtk'])
+%     save([out_fname '.mat'])
 
 end
 
