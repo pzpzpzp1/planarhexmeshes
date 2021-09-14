@@ -1,10 +1,10 @@
-nF = 20;
+nF = 1;
 V = randn(nF,3,4);
 
 
 f1 = figure; axis equal; hold all; rotate3d on;
 dt = .0001;
-for i=1:1000
+for i=1:100
     cla; axis equal off; hold all; rotate3d on;
     for j=1:nF
         Vj = permute(V(j,:,:),[3 2 1]);
@@ -13,6 +13,6 @@ for i=1:1000
     drawnow; pause(.01);
     
     [p1, pgrad] = face_planarity(V);
-    V = V - dt * pgrad;
+    V = V - dt * pgrad * sign(p1);
     
 end

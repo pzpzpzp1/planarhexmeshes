@@ -4,15 +4,18 @@ function [Vproj, Vin] = planar_face_projections(Vin, visualize)
     % clc; close all;
     if nargin ==0
         visualize = 1;
-        nF = 20;
+        nF = 4;
         Vin = randn(nF,3,4);
         Vin(:,1,:) = Vin(:,1,:) + [1:nF]'*2; % space quads apart by 2.
     end
     nF = size(Vin,1);
+    if nF==3
+        warning('nF = 3 specifically fails check gradients. I assume a symmetry issue in cross/dot.');
+    end
 
     options = optimoptions('fmincon','SpecifyObjectiveGradient',true,'SpecifyConstraintGradient',true,'HessianApproximation','lbfgs',...
         'StepTolerance',1e-10,'ConstraintTolerance',1e-5,'Display','iter','OptimalityTolerance',1e-6 ,...
-        'CheckGradients',false,'FiniteDifferenceType','central','FiniteDifferenceStepSize',1e-3);
+        'CheckGradients',true,'FiniteDifferenceType','central','FiniteDifferenceStepSize',1e-3);
 
     fun = @(x) objfun(Vin,x);
     [Vproj,fval,exitflag,output,lambda,~,~] = fmincon(fun,Vin(:),[],[],[],[],[],[],@mycon,options);
@@ -45,6 +48,22 @@ function [val, grad] = objfun(V,x)
     grad = -(V(:)-x(:));
     val = .5 * grad' * grad;
 end
+
+
+function [c, ceq, gradc, gradceq] = mycon(Vin)
+    c=0;
+    Vin = reshape(Vin,[],3,4);
+    nF = size(Vin,1);
+    
+    [planarity, pgrad] = face_planarity(Vin);
+    
+    ceq = planarity';
+    gradceq = sparse(1:numel(Vin), repmat([1:nF]',12,1), pgrad(:), numel(Vin), nF);
+    % gradceq = sparse(1:numel(Vin), repmat([1:12]',nF,1), pgrad(:), numel(Vin), nF);
+    
+    gradc = zeros(numel(Vin),1);
+end
+
 
 
 

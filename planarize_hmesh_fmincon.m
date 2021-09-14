@@ -41,17 +41,17 @@ function planarize_hmesh_fmincon(file_name)
     con = @(x) mycon(dat, x);
     [Vproj,fval,exitflag,output,lambda,~,~] = fmincon(fun, V0, [],[],[],[],[],[],con,options);
     [~,final_planarity] = con(Vproj);
+    
     figure; hist(final_planarity); hold all; title('final planarities');
     
-    
-    figure; t=tiledlayout(1,2);t.TileSpacing = 'compact';t.Padding = 'compact';
+    f1=figure; t=tiledlayout(1,2);t.TileSpacing = 'compact';t.Padding = 'compact';
     ax1 = nexttile(1); hold all; axis equal off; rotate3d on; 
     ptc1 = patch('vertices',V0,'faces',F,'facealpha',1,'facecolor','green','edgealpha',1)
     title('Original')
     ax2 = nexttile(2); hold all; axis equal off; rotate3d on; 
     ptc2 = patch('vertices',Vproj,'faces',F,'facealpha',1,'facecolor','green','edgealpha',1)
     title(['After Projection Distance: ' num2str(fval) ' Planarity: ' num2str(norm(final_planarity)) ])
-    linkprop([ax1 ax2],{'XLim','Ylim','Zlim','CameraTarget','CameraPosition'})
+    f1.UserData=linkprop([ax1 ax2],{'XLim','Ylim','Zlim','CameraTarget','CameraPosition'})
     
     %% save output
     [dname,fname,ext] = fileparts(file_name);
