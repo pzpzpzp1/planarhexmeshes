@@ -46,18 +46,7 @@ function [val, grad] = objfun(V,x)
     val = .5 * grad' * grad;
 end
 
-function [c, ceq, gradc, gradceq] = mycon(Vin)
-    c=0;
-    Vin = reshape(Vin,[],3,4);
-    nF = size(Vin,1);
-    
-    [planarity, pgrad] = face_planarity(Vin);
-    
-    ceq = planarity';
-    gradceq = sparse(1:numel(Vin), repmat([1:nF]',12,1), pgrad(:), numel(Vin), nF);
-    
-    gradc = zeros(numel(Vin),1);
-end
+
 
 
 
