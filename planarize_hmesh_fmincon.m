@@ -45,20 +45,20 @@ function planarize_hmesh_fmincon(file_name)
     
     
     figure; t=tiledlayout(1,2);t.TileSpacing = 'compact';t.Padding = 'compact';
-    nexttile(1); hold all; axis equal off; rotate3d on; 
+    ax1 = nexttile(1); hold all; axis equal off; rotate3d on; 
     ptc1 = patch('vertices',V0,'faces',F,'facealpha',1,'facecolor','green','edgealpha',1)
     title('Original')
-    nexttile(2); hold all; axis equal off; rotate3d on; 
+    ax2 = nexttile(2); hold all; axis equal off; rotate3d on; 
     ptc2 = patch('vertices',Vproj,'faces',F,'facealpha',1,'facecolor','green','edgealpha',1)
     title(['After Projection Distance: ' num2str(fval) ' Planarity: ' num2str(norm(final_planarity)) ])
+    linkprop([ax1 ax2],{'XLim','Ylim','Zlim','CameraTarget','CameraPosition'})
     
     %% save output
-%     [dname,fname,ext] = fileparts(file_name);
-%     out_fname = ['results/' fname];
-%     outmesh.cells = mesh.cells; outmesh.points = V;
-%     save_vtk(outmesh, [out_fname '.vtk'])
-%     save([out_fname '.mat'])
-
+    [dname,fname,ext] = fileparts(file_name);
+    out_fname = ['results_fmincon/' fname];
+    outmesh.cells = mesh.cells; outmesh.points = V;
+    save_vtk(outmesh, [out_fname '.vtk'])
+    
 end
 
 function [c, ceq, gradc, gradceq] = mycon(dat, V)
