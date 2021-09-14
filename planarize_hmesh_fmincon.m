@@ -1,14 +1,14 @@
 function planarize_hmesh_fmincon(file_name)
 
     if nargin==0
-        % file_name = 'meshes/bunny.vtk';
+%         file_name = 'meshes/bunny.vtk';
 %         file_name = 'meshes/double-torus.vtk';
-        % file_name = 'meshes/joint.vtk';
+%         file_name = 'meshes/joint.vtk';
         % file_name = 'meshes/rockarm.vtk';
         % file_name = 'meshes/hex_sphere.vtk';
         % file_name = 'meshes/hex_tetrahedron.vtk';
         file_name = 'meshes/hex_ellipsoid_coarse.vtk';
-        % file_name = 'meshes/kitten.mesh';
+%         file_name = 'meshes/kitten.mesh';
     end
 
     %% load mesh
@@ -36,7 +36,7 @@ function planarize_hmesh_fmincon(file_name)
     %% setup fmincon
     options = optimoptions('fmincon','SpecifyObjectiveGradient',true,'SpecifyConstraintGradient',true,'HessianApproximation','lbfgs',...
         'StepTolerance',1e-10,'ConstraintTolerance',1e-5,'Display','iter','OptimalityTolerance',1e-6 ,...
-        'CheckGradients',true,'FiniteDifferenceType','central','FiniteDifferenceStepSize',1e-3);
+        'CheckGradients',false,'FiniteDifferenceType','central','FiniteDifferenceStepSize',1e-3);
     fun = @(x) objfun(V0, x);
     con = @(x) mycon(dat, x);
     [Vproj,fval,exitflag,output,lambda,~,~] = fmincon(fun, V0, [],[],[],[],[],[],con,options);
@@ -56,7 +56,7 @@ function planarize_hmesh_fmincon(file_name)
     %% save output
     [dname,fname,ext] = fileparts(file_name);
     out_fname = ['results_fmincon/' fname];
-    outmesh.cells = mesh.cells; outmesh.points = V;
+    outmesh.cells = mesh.cells; outmesh.points = Vproj;
     save_vtk(outmesh, [out_fname '.vtk'])
     
 end
