@@ -23,8 +23,6 @@ function planarize_hmesh_fmincon(file_name)
 
     %% Get faces and face extractor
     F = hex2face(H);
-    [Fu,ia,ic] = unique(sort(F,2),'rows');
-    F = F(ia,:);
     nF = size(F,1);
     Fmat = sparse(repmat(1:nF,1,4),F,F*0+1,nF,nV);
     Fmatselector = sparse(1:(4*nF), F', F*0+1, 4*nF, nV);
