@@ -8,6 +8,9 @@ function planarize_hmesh_fmincon(file_name)
         % file_name = 'meshes/hex_sphere.vtk';
         % file_name = 'meshes/hex_tetrahedron.vtk';
         file_name = 'meshes/hex_ellipsoid_coarse.vtk';
+        file_name = 'meshes/sing1.vtk';
+%         file_name = 'meshes/sing2.vtk';
+%         file_name = 'meshes/sing3.vtk';
 %         file_name = 'meshes/kitten.mesh';
     end
 

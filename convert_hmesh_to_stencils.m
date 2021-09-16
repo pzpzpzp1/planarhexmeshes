@@ -1,9 +1,16 @@
 function stencils = convert_hmesh_to_stencils(file_name, uniformkeys)
     if nargin==0
         close all;
-        file_name = 'results_fmincon/hex_ellipsoid_coarse.vtk';
+%         file_name = 'results_fmincon/hex_ellipsoid_coarse.vtk';
+        file_name = 'results_fmincon/sing1.vtk';
+%         file_name = 'results_fmincon/sing2.vtk';
+%         file_name = 'results_fmincon/sing3.vtk';
         uniformkeys = true;
     end
+    
+    %% magic parameters
+    pfactor = .5;
+    keybufferperc = .2; % reserved space on each corner
 
     %% Load mesh
     mesh = load_vtk(file_name);
@@ -16,7 +23,7 @@ function stencils = convert_hmesh_to_stencils(file_name, uniformkeys)
     Fv = reshape(Fmatselector*V,4,nF,3); % [4 nf 3]
     Fv_pr = permute(Fv,[2 3 1]);
     [ceq] = face_planarity(Fv_pr);
-    if(norm(ceq) > 1e-7)
+    if(norm(ceq) > 1e-6)
         error(['Faces of this hex mesh are not planar enough. planarity: ' num2str(norm(ceq))]);
     end
 
@@ -51,7 +58,6 @@ function stencils = convert_hmesh_to_stencils(file_name, uniformkeys)
     end
 
     %% Build planar face outlines using edge keys
-    keybufferperc = .1; % reserved space on each corner
     keybuffer = min(elens) * keybufferperc;
     for i=1:nF;              %         i=randi(nF)
         % build keys
@@ -72,7 +78,7 @@ function stencils = convert_hmesh_to_stencils(file_name, uniformkeys)
             end
             
             iamfacen = find(estr.faces == i);
-            key{j} = buildkey(keyorder,keylens,iamfacen,keybuffer,elens(eind));
+            [key{j}, keylensA{j}] = buildkey(keyorder,keylens,iamfacen,keybuffer,elens(eind),pfactor);
         end
         
         % fit key to embedded edge
@@ -84,7 +90,8 @@ function stencils = convert_hmesh_to_stencils(file_name, uniformkeys)
             
             x = key{j}(:,1);
             y = key{j}(:,2);
-            yscaled = y * -keybuffer;
+            % yscaled = y * -keybuffer;
+            yscaled = y * -keylensA{j}(2);
             startp = fvout(jjp1(1),:);
             endp = fvout(jjp1(2),:);
             dir = endp-startp;
@@ -136,7 +143,7 @@ function stencils = convert_hmesh_to_stencils(file_name, uniformkeys)
 end
 
 % build key.
-function key = buildkey(keyorder,keylens,iamfacen,keybuffer,elen)
+function [key, keylensA] = buildkey(keyorder,keylens,iamfacen,keybuffer,elen,pfactor)
     keyorderA = [0 keyorder 0];
     keytotallength = elen-2*keybuffer;
     keylensA = keylens/sum(keylens);
@@ -163,7 +170,7 @@ function key = buildkey(keyorder,keylens,iamfacen,keybuffer,elen)
         curr = raised(i);
     end
     y=y-.5;
-    y=y;
+    y(y>0)=y(y>0)*pfactor; % make protrusion less than indentation
     key = [x' y'];
 end
 
