@@ -9,11 +9,14 @@ function data = processhmesh(V,H,visualize)
     end
     nV = size(V,1); 
     nH = size(H,1);
+    data.V=V;
+    data.H=H;
     
     %% hex-face
     [F, H2F] = hex2face(H); 
     nF = size(F,1);
     data.F = F; data.H2F = H2F;
+    
     %% hex-edge
     [E, H2E] = hex2edge(H); 
     data.E = E; data.H2E = H2E;
@@ -27,8 +30,10 @@ function data = processhmesh(V,H,visualize)
     %% edge-vert   hex-vert
     E2V = sparse([1:nE, 1:nE],E,E*0+1,nE,nV);
     H2V = sparse(repmat(1:nH,1,8),H,H*0+1,nH,nV);
+    F2V = sparse(repmat(1:nF,1,4),F,F*0+1,nF,nV);
     data.E2V = E2V;
     data.H2V = H2V;
+    data.F2V = F2V;
     
     %% get boundary
     isBoundaryFace = full((sum(H2F)==1)');
@@ -44,6 +49,7 @@ function data = processhmesh(V,H,visualize)
     efdeg = full(sum(E2F,2)); % edge face degree
     isSingularEdge = full((efdeg~=4 & ~isBoundaryEdge) | (efdeg~=3 & isBoundaryEdge));
     isSingularVertex = false(nV,1); isSingularVertex(unique(E(isSingularEdge,:)))=true;
+    data.efdeg = efdeg;
     
     intSingEdgesPerVert = sum(E2V(isSingularEdge & ~isBoundaryEdge,:))';
     boundarySingEdgesPerVert = sum(E2V(isSingularEdge & isBoundaryEdge,:))';
@@ -55,12 +61,43 @@ function data = processhmesh(V,H,visualize)
     data.isSingularVertex = isSingularVertex;
     data.isSingularNode = isSingularNode;
     
+    %% geometric stuff
+    cellBarycenters = H2V*V/8;
+    faceBarycenters = F2V*V/4;
+    edgelengths = vecnorm(V(E(:,1),:)-V(E(:,2),:),2,2);
+    data.cellBarycenters = cellBarycenters;
+    data.faceBarycenters = faceBarycenters;
+    data.edgelengths = edgelengths;
+    
+    fv1 = V(F(:,1),:);
+    fv2 = V(F(:,2),:);
+    fv3 = V(F(:,3),:);
+    fv4 = V(F(:,4),:);
+    v123n = @(v1,v2,v3) cross(v2-v1,v3-v1);
+    n1 = v123n(fv1,fv2,fv3);
+    n2 = v123n(fv2,fv3,fv4);
+    n3 = v123n(fv3,fv4,fv1);
+    n4 = v123n(fv4,fv1,fv2);
+    n = (n1+n2+n3+n4)/4;
+    n = n./vecnorm(n,2,2);
+    faceNormals = n;
+    data.faceNormals = faceNormals;
+    
+    bvertNormals = F2V(isBoundaryFace,isBoundaryVertex)' * data.faceNormals(isBoundaryFace,:);
+    bvertNormals = bvertNormals./vecnorm(bvertNormals,2,2);
+    data.bvertNormals = bvertNormals;
+    
+    %% visualize
     if visualize
         figure; hold all; axis equal off; rotate3d on;
         patch('vertices',V,'faces',F(isBoundaryFace,:),'facecolor','green','facealpha',.1,'edgealpha',0)
         patch('vertices',V,'faces',E(isBoundaryEdge,[1 2 1]))
-        patch('vertices',V,'faces',E(isSingularEdge,[1 2 1]),'linewidth',2,'edgecolor','blue')
-        scatter3(V(isSingularNode,1),V(isSingularNode,2),V(isSingularNode,3),50,'r','filled')
+        patch('vertices',V,'faces',E(isSingularEdge,[1 2 1]),'linewidth',3,'edgecolor','blue')
+        scatter3(V(isSingularNode,1),V(isSingularNode,2),V(isSingularNode,3),100,'r','filled')
+        
+%         quiver3(faceBarycenters(isBoundaryFace,1),faceBarycenters(isBoundaryFace,2),faceBarycenters(isBoundaryFace,3),...
+%             faceNormals(isBoundaryFace,1),faceNormals(isBoundaryFace,2),faceNormals(isBoundaryFace,3))
+%         quiver3(V(isBoundaryVertex,1),V(isBoundaryVertex,2),V(isBoundaryVertex,3),...
+%             bvertNormals(:,1),bvertNormals(:,2),bvertNormals(:,3))
     end
-    
 end
