@@ -28,8 +28,16 @@ function data = processhmesh(V,H,visualize)
     %% hex-edge
     [E, H2E] = hex2edge(H); 
     data.E = E; data.H2E = H2E;
-    %% edge-face
     nE = size(E,1);
+    
+    V2V = sparse(data.E(:,1), data.E(:,2), -1, nV,nV);
+    V2V=V2V+V2V'
+    deg = sum(V2V,1);
+    V2V(1:(nV+1):end) = -deg;
+    data.graphlaplacian = V2V;
+    
+    
+    %% edge-face
     faceedges = reshape(permute(reshape(F(:,[1 2, 2 3, 3 4, 4 1]),nF,2,4),[1 3 2]),nF*4,2); % nF 4 2
     [alltrue, faceInEdgelist] = ismember(sort(faceedges,2), sort(E,2),'rows');
     assert(all(alltrue));
