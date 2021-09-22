@@ -28,7 +28,7 @@ function [F, H2F, H2Farray, F2Harray, H2F6, H2F_flip, Fall] = hex2face(H)
     end
     
     %% build F2Harray. for boundary, first column indicates which hex the face is part of. second column indicates which face of that hex it is as 1-6. same for interior but now theres two hexes.
-    isBoundaryFace = full(sum(H2F)'==1);
+    isBoundaryFace = full(sum(H2F,1)'==1);
     F2Harray = zeros(nF,4);
     [ii,jj] = find(H2F(:,isBoundaryFace)'); [ii,perm] = sort(ii); jj=jj(perm);
     F2Harray(isBoundaryFace,1) = jj;

@@ -47,8 +47,8 @@ function data = processhmesh(V,H,visualize)
     data.F2V = F2V;
     
     %% get boundary
-    isBoundaryFace = full((sum(H2F)==1)');
-    isBoundaryEdge = full(sum(E2F(:,isBoundaryFace)')'~=0);
+    isBoundaryFace = full((sum(H2F,1)==1)');
+    isBoundaryEdge = full(sum(E2F(:,isBoundaryFace)',1)'~=0);
     isBoundaryVertex = false(nV,1); isBoundaryVertex(unique(F(isBoundaryFace,:)))=true;
     isBoundaryHex = any(isBoundaryVertex(H),2);
     data.isBoundaryFace = isBoundaryFace;
@@ -62,8 +62,8 @@ function data = processhmesh(V,H,visualize)
     isSingularVertex = false(nV,1); isSingularVertex(unique(E(isSingularEdge,:)))=true;
     data.efdeg = efdeg;
     
-    intSingEdgesPerVert = sum(E2V(isSingularEdge & ~isBoundaryEdge,:))';
-    boundarySingEdgesPerVert = sum(E2V(isSingularEdge & isBoundaryEdge,:))';
+    intSingEdgesPerVert = sum(E2V(isSingularEdge & ~isBoundaryEdge,:),1)';
+    boundarySingEdgesPerVert = sum(E2V(isSingularEdge & isBoundaryEdge,:),1)';
     isSingularNode = isSingularVertex & ...
                     ((~isBoundaryVertex & intSingEdgesPerVert~=2) | ...
                     (isBoundaryVertex & ~((intSingEdgesPerVert==1 & boundarySingEdgesPerVert==0 | ...
