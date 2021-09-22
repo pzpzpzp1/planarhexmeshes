@@ -15,7 +15,7 @@ function data = processhmesh(V,H,visualize)
     data.nH = nH;
     
     %% hex-face
-    [F, H2F, H2Farray, F2Harray, H2F6, H2F_flip] = hex2face(H);
+    [F, H2F, H2Farray, F2Harray, H2F6, H2F_flip, Fall] = hex2face(H);
     nF = size(F,1);
     data.nF = nF;
     data.F = F; data.H2F = H2F;
@@ -23,6 +23,7 @@ function data = processhmesh(V,H,visualize)
     data.F2Harray = F2Harray;
     data.H2F6 = H2F6;
     data.H2F_flip = H2F_flip;
+    data.Fall = Fall; % (nH*6, 4)
     
     %% hex-edge
     [E, H2E] = hex2edge(H); 
