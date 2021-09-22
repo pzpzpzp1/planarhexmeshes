@@ -11,11 +11,18 @@ function data = processhmesh(V,H,visualize)
     nH = size(H,1);
     data.V=V;
     data.H=H;
+    data.nV = nV;
+    data.nH = nH;
     
     %% hex-face
-    [F, H2F] = hex2face(H); 
+    [F, H2F, H2Farray, F2Harray, H2F6, H2F_flip] = hex2face(H);
     nF = size(F,1);
+    data.nF = nF;
     data.F = F; data.H2F = H2F;
+    data.H2Farray = H2Farray;
+    data.F2Harray = F2Harray;
+    data.H2F6 = H2F6;
+    data.H2F_flip = H2F_flip;
     
     %% hex-edge
     [E, H2E] = hex2edge(H); 
@@ -26,7 +33,10 @@ function data = processhmesh(V,H,visualize)
     [alltrue, faceInEdgelist] = ismember(sort(faceedges,2), sort(E,2),'rows');
     assert(all(alltrue));
     E2F = sparse(repmat(1:nF,1,4), faceInEdgelist, faceInEdgelist*0+1, nF, nE)';
+    F2Earray = reshape(faceInEdgelist,nF,4);
+    data.nE = nE;
     data.E2F = E2F;
+    data.F2Earray = F2Earray;
     %% edge-vert   hex-vert
     E2V = sparse([1:nE, 1:nE],E,E*0+1,nE,nV);
     H2V = sparse(repmat(1:nH,1,8),H,H*0+1,nH,nV);
