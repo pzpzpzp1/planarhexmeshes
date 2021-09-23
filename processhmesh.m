@@ -31,7 +31,7 @@ function data = processhmesh(V,H,visualize)
     nE = size(E,1);
     
     V2V = sparse(data.E(:,1), data.E(:,2), -1, nV,nV);
-    V2V=V2V+V2V'
+    V2V=V2V+V2V';
     deg = sum(V2V,1);
     V2V(1:(nV+1):end) = -deg;
     data.graphlaplacian = V2V;
@@ -63,6 +63,20 @@ function data = processhmesh(V,H,visualize)
     data.isBoundaryEdge = isBoundaryEdge;
     data.isBoundaryVertex = isBoundaryVertex;
     data.isBoundaryHex = isBoundaryHex;
+    
+    %% verify boundary is manifold and closed.
+    QM.F = data.F(isBoundaryFace,:);
+    QM.V = data.V;
+    QM.FE = reshape(permute(reshape(QM.F(:,[1 2, 2 3, 3 4, 4 1]),[],2,4),[1 3 2]),[],4,2); % F*4, 2. faceedges
+    FEflat = reshape(QM.FE, [], 2);
+    [~, ia, ic] = unique(sort(reshape(QM.FE,[],2),2),'rows');
+    QM.E = FEflat(ia,:);
+    QM.F2Earray = reshape(ic,[],4);
+    QM.nF=size(QM.F,1);
+    QM.nV=size(QM.V,1);
+    QM.nE=size(QM.E,1);
+    QM.F2E = sparse(repmat(1:size(QM.F,1),1,4),QM.F2Earray,QM.F2Earray*0+1,QM.nF,QM.nE);
+    assert(all(sum(QM.F2E)==2)); 
     
     %% get singularities
     efdeg = full(sum(E2F,2)); % edge face degree
