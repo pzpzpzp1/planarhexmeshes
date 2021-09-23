@@ -76,7 +76,7 @@ function data = processhmesh(V,H,visualize)
     QM.nV=size(QM.V,1);
     QM.nE=size(QM.E,1);
     QM.F2E = sparse(repmat(1:size(QM.F,1),1,4),QM.F2Earray,QM.F2Earray*0+1,QM.nF,QM.nE);
-    assert(all(sum(QM.F2E)==2)); 
+    data.nonmanifoldBoundaryEdges = find(sum(QM.F2E,1)~=2); 
     
     %% get singularities
     efdeg = full(sum(E2F,2)); % edge face degree
@@ -125,6 +125,10 @@ function data = processhmesh(V,H,visualize)
         figure; hold all; axis equal off; rotate3d on;
         patch('vertices',V,'faces',F(isBoundaryFace,:),'facecolor','green','facealpha',.1,'edgealpha',0)
         patch('vertices',V,'faces',E(isBoundaryEdge,[1 2 1]))
+        
+        patch('vertices',V,'faces',QM.E(data.nonmanifoldBoundaryEdges,[1 2 1]),'linewidth',3,'edgecolor','c')
+        assert(numel(data.nonmanifoldBoundaryEdges)==0); % nonmanifold boundary edges.
+        
         patch('vertices',V,'faces',E(isSingularEdge,[1 2 1]),'linewidth',3,'edgecolor','blue')
         scatter3(V(isSingularNode,1),V(isSingularNode,2),V(isSingularNode,3),100,'r','filled')
         
