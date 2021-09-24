@@ -4,6 +4,7 @@
 function [energy, grad,out] = scaledJacobian_hmesh(V,H,p)
     if nargin==0
         file_name = 'meshes/hex_ellipsoid_coarse.vtk';
+        file_name = 'test.vtk';
         [dname,fname,ext] = fileparts(file_name);
         if strcmp(ext,'.vtk')
             mesh = load_vtk(file_name);
@@ -20,7 +21,7 @@ function [energy, grad,out] = scaledJacobian_hmesh(V,H,p)
     HV = permute(reshape(V(H(:),:),nH,8,3),[2 3 1]); % 8 3 nH;
     
     % hardcoded ordering in reference to canonical hex vert ordering. each quadruplet is the central vertex and then right hand rule points into the cube cycling around its 3 adjacent vertices.
-    corneredgeinds = [1 3 4 5; 2 6 3 1; 3 2 7 4; 4 1 3 8; 5 1 8 6; 6 5 7 2; 7 6 8 3; 8 5 4 7]; % 8 x 4;
+    corneredgeinds = [1 2 4 5; 2 6 3 1; 3 2 7 4; 4 1 3 8; 5 1 8 6; 6 5 7 2; 7 6 8 3; 8 5 4 7]; % 8 x 4;
     THV = HV(corneredgeinds,:,:); % 8*4 3 nH
     rV = reshape(permute(reshape(THV,8,4,3,[]),[4 1 3 2]),[],3,4); %nH*8 3 4
 
@@ -35,9 +36,12 @@ function [energy, grad,out] = scaledJacobian_hmesh(V,H,p)
     
     if nargout > 1
         out.SJ = SJ;
-        out.SJ = SJgrad;
-        out.J = SJgrad;
+        out.SJgrad = SJgrad;
+        out.J = J;
         out.Jgrad = Jgrad;
+        % min over corners per hex first.
+        hexalabSJ = min(reshape(SJ,[],8)')'; % [min(hexalabSJ) max(hexalabSJ)];
+        out.hexalabSJ = hexalabSJ;
 
         % reweight and aggregate gradient
         fracturedGrad = reshape(permute((p*(1-SJ).^(p-1)).*-SJgrad, [1 3 2]), nH,8,4,3); % nH,8,4,3
