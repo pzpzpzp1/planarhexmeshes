@@ -1,5 +1,5 @@
 clear all; close all; clc;
-% file_name = 'meshes/double-torus.vtk';
+file_name = 'meshes/double-torus.vtk';
 % file_name = 'meshes/joint.vtk';
 % file_name = 'meshes/rockarm.vtk';
 % file_name = 'meshes/hex_ellipsoid_coarse.vtk';
@@ -7,7 +7,7 @@ clear all; close all; clc;
 % file_name = 'meshes/hex_sphere.vtk';
 % file_name = 'meshes/kitten.mesh';
 % file_name = 'meshes/bunny.vtk';
-file_name = 'meshes/hex_ellipsoid_coarse.vtk';
+% file_name = 'meshes/hex_ellipsoid_coarse.vtk';
 
 [dname,fname,ext] = fileparts(file_name);
 

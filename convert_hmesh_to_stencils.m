@@ -2,9 +2,10 @@ function stencils = convert_hmesh_to_stencils(file_name, uniformkeys)
     if nargin==0
         close all;
 %         file_name = 'results_fmincon/hex_ellipsoid_coarse.vtk';
-        file_name = 'results_fmincon/sing1.vtk';
+%         file_name = 'results_fmincon/sing1.vtk';
 %         file_name = 'results_fmincon/sing2.vtk';
-%         file_name = 'results_fmincon/sing3.vtk';
+        file_name = 'results_fmincon/sing3.vtk';
+%         file_name = 'results_fmincon/bunny.vtk';
         uniformkeys = true;
     end
     

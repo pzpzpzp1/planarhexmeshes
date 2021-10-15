@@ -2,13 +2,13 @@ function planarize_hmesh_fmincon(file_name)
 
     if nargin==0
 %         file_name = 'meshes/bunny.vtk';
-%         file_name = 'meshes/double-torus.vtk';
+        file_name = 'meshes/double-torus.vtk';
 %         file_name = 'meshes/joint.vtk';
         % file_name = 'meshes/rockarm.vtk';
         % file_name = 'meshes/hex_sphere.vtk';
         % file_name = 'meshes/hex_tetrahedron.vtk';
-        file_name = 'meshes/hex_ellipsoid_coarse.vtk';
-        file_name = 'meshes/sing1.vtk';
+%         file_name = 'meshes/hex_ellipsoid_coarse.vtk';
+%         file_name = 'meshes/sing1.vtk';
 %         file_name = 'meshes/sing2.vtk';
 %         file_name = 'meshes/sing3.vtk';
 %         file_name = 'meshes/kitten.mesh';
